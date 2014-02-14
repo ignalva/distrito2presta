@@ -41,7 +41,13 @@ public class CombinacionManager extends Manager {
 			dao.load(combinacion); 
 			dao.close();
 			
-			if (combinacion.price==null) combinacion.price=combinacion.producto().price;
+			if (combinacion.price==null) 
+				if (combinacion.producto().price!=null)
+					combinacion.price=combinacion.producto().price;
+				else{
+					Sincro.LOG.warning(combinacion+" sin precio!!");
+					return false;
+				}
 						
 			ListIterator<ValorCaracteristica> iter = combinacion.associations.valores.listIterator();
 			while (iter.hasNext()){

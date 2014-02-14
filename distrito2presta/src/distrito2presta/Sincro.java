@@ -45,6 +45,7 @@ public class Sincro {
 	public static int LANGSPANISH;
 	public static String LANGPRESTASHOP;
 	public static int FABRICANTES;
+	public static int TARIFAWEB;
 	
 	public static void main(String[] args) {
 		try{
@@ -103,6 +104,7 @@ public class Sincro {
 			LANGSPANISH=Integer.parseInt(p.getProperty("LANGSPANISH"));	
 			LANGPRESTASHOP=p.getProperty("LANGPRESTASHOP");
 			FABRICANTES=Integer.parseInt(p.getProperty("FABRICANTES"));
+			TARIFAWEB=Integer.parseInt(p.getProperty("TARIFAWEB"));
 			
 			FileHandler f=new FileHandler("./logs/"+Sincro.class.getName()+".%g.log",true);
 			f.setFormatter(new SimpleFormatter());

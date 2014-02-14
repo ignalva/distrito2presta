@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 
 public class StockDAO extends DAO {
 	
-	private static String SQLLOAD="SELECT CODARTICULO, SUM(STOCK1) TOTAL FROM EXISTENC WHERE CODARTICULO=? GROUP BY CODARTICULO";
+	private static String SQLLOAD="SELECT CODARTICULO, SUM(STOCK1-STOCKMINIMO) TOTAL FROM EXISTENC WHERE CODARTICULO=? GROUP BY CODARTICULO";
 	
 	public StockDAO(Connection con) {
 		super(con);
@@ -22,6 +22,8 @@ public class StockDAO extends DAO {
 			
 			ResultSet rs = stmt.executeQuery();
 			stock.quantity=rs.next()?(int)rs.getDouble("TOTAL"):0;
+			
+			if (stock.quantity<0) stock.quantity=0;
 			
 			rs.close();
 			stmt.close();	

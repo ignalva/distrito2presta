@@ -12,7 +12,8 @@ import java.sql.ResultSet;
 
 public class ProductoDAO extends DAO {
 	
-	private static String SQLLOAD="SELECT NOMBRE, DESCRIPCION, PRECIOVENTA, TIPOIVA, KILOS, BAJA, EXCLUIRWEB, DESCRIPCIONCORTA FROM ARTICULO WHERE CODIGO=?";
+	private static String SQLLOAD="SELECT NOMBRE, DESCRIPCION, TIPOIVA, KILOS, BAJA, EXCLUIRWEB, DESCRIPCIONCORTA FROM ARTICULO WHERE CODIGO=?";
+	private static String SQLPRECIO="SELECT PRECIO FROM VENTA WHERE CODARTICULO=? AND CODTARIFA=?";
 	private static String SQLRELACIONADOS="SELECT I.NOMBRE FROM ARTRELACIONADOS R INNER JOIN IDIOMAARTICULO I ON I.CODIDIOMA=? AND R.CODRELACIONADO=I.CODARTICULO WHERE R.CODARTICULO=?";
 	private static String SQLFEATURES="SELECT IC.NOMBRE IDCARACT, ICV.VALORTRADUC IDFEATURE, C.CODCARACT, C.VALOR FROM CARVALOR C, IDIOMACARACT IC, IDIOMACARVALID ICV WHERE C.CODCLASE=ICV.CODCLASE AND C.CODCARACT=ICV.CODCARACT AND C.VALOR=ICV.VALORCARVALID AND IC.CODIDIOMA=ICV.CODIDIOMA AND IC.CODCLASE=ICV.CODCLASE AND IC.CODCARACT=ICV.CODCARACT AND ICV.CODIDIOMA=? AND ICV.CODCLASE=? AND C.CODOBJETO=? ORDER BY IDCARACT ASC, IDFEATURE ASC";
 	private static String SQLFIESTAEVENTO="SELECT IT.DESCRIPCION ID FROM IDIOMATIPO IT, IDIOMACARVALID ICV, CARVALOR CV WHERE CV.VALOR=ICV.VALORCARVALID AND ICV.CODCLASE=CV.CODCLASE AND ICV.CODOBJETO IS NULL AND ICV.CODCARACT=CV.CODCARACT AND ICV.DIMENSION IS NULL AND ICV.VALORTRADUC=IT.METATITLE AND IT.CODIDIOMA=ICV.CODIDIOMA AND CV.CODCLASE=? AND CV.CODOBJETO=? AND ICV.CODIDIOMA=? AND IT.TIPO=?";
@@ -34,7 +35,6 @@ public class ProductoDAO extends DAO {
 				producto.nombre(rs.getString("NOMBRE"));
 				producto.descripcion(rs.getString("DESCRIPCION")); 			//Test Blob!!
 				producto.descripcionCorta(rs.getString("DESCRIPCIONCORTA"));//Test Blob!!
-				producto.price=new BigDecimal(rs.getDouble("PRECIOVENTA")).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
 				producto.id_tax_rules_group=rs.getInt("TIPOIVA")+1; 
 				producto.weight=rs.getDouble("KILOS");
 				String baja=rs.getString("BAJA");
@@ -47,6 +47,7 @@ public class ProductoDAO extends DAO {
 			
 			rs.close();
 			stmt.close();	
+			
 			return ok;
 		}
 		catch (Exception e) {
@@ -55,6 +56,28 @@ public class ProductoDAO extends DAO {
 		}
 	}
 
+	public boolean loadPrecio(Producto producto) throws Exception{
+		try{
+			PreparedStatement stmt = con.prepareStatement(SQLPRECIO);
+			
+			stmt.setString(1, producto.reference);
+			stmt.setInt(2, Sincro.TARIFAWEB);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next())
+				producto.price=new BigDecimal(rs.getDouble("PRECIO")).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+			else
+				Sincro.LOG.warning(producto +" sin precio!!");
+			
+			rs.close();
+			stmt.close();	
+			return producto.price!=null;
+		}
+		catch (Exception e) {
+			Sincro.LOG.severe(e.toString());
+			throw new Exception("FATAL ERROR "+ getClass() +".loadPrecio("+producto+")");
+		}
+	}
+	
 	public boolean setRelacionados(Producto producto) throws Exception {
 		try{
 			PreparedStatement stmt = con.prepareStatement(SQLRELACIONADOS);

@@ -19,6 +19,7 @@ public class ProductoManager extends Manager {
 			
 			ProductoDAO daoProducto = new ProductoDAO(pool.getConnection());
 			boolean ok=	daoProducto.load(producto) && 
+						daoProducto.loadPrecio(producto) &&
 						daoProducto.setRelacionados(producto) && 
 						daoProducto.setFeatures(producto) && 
 						daoProducto.setCategories(producto);

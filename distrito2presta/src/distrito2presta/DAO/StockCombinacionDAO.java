@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 
 public class StockCombinacionDAO extends DAO {
 	
-	private static String SQLLOAD="SELECT CODARTICULO, CODCARACT, VALOR, SUM(STOCK1) TOTAL FROM CAREXIST WHERE CODARTICULO=? AND CODCARACT=? AND VALOR=? GROUP BY CODARTICULO, CODCARACT, VALOR";
+	private static String SQLLOAD="SELECT CODARTICULO, CODCARACT, VALOR, SUM(STOCK1-STOCKMINIMO) TOTAL FROM CAREXIST WHERE CODARTICULO=? AND CODCARACT=? AND VALOR=? GROUP BY CODARTICULO, CODCARACT, VALOR";
 	
 	public StockCombinacionDAO(Connection con) {
 		super(con);	
@@ -25,6 +25,8 @@ public class StockCombinacionDAO extends DAO {
 			ResultSet rs = stmt.executeQuery();
 			stock.quantity=rs.next()?(int)rs.getDouble("TOTAL"):0;
 
+			if (stock.quantity<0) stock.quantity=0;
+			
 			rs.close();
 			stmt.close();	
 		}
